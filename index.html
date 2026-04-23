@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AlcoCompany Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="setup-screen">
+        <img src="./img/logo.png" class="logo">
+        
+        <div class="input-group">
+            <input type="text" id="player-input" placeholder="Ім'я гравця...">
+            <button class="add-btn" onclick="addPlayer()">+</button>
+        </div>
+
+        <ul id="player-list"></ul>
+
+        <button id="start-btn" class="start-btn" onclick="startGame()" disabled>МІНІМУМ 2 ГРАВЦІ!</button>
+    </div>
+
+    <div id="game-screen" style="display: none;" onclick="nextTask()">
+        <div class="btn-container">
+        <button class="back-btn" onclick="goBack(event)">←</button>
+        <button class="menu-btn" onclick="toggleSettings(event)"><img src="./img/menu.png" class="menu-btn"></button>
+        </div>
+        <div id="task-text" class="task-text">Натисніть на екран, щоб почати!</div>
+    </div>
+<div id="settings-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="toggleSettings()">&times;</span>
+        <h2>Налаштування</h2>
+        <hr>
+        <div class="menu-item">
+            <span>Звукові ефекти</span>
+            <input type="checkbox" checked>
+        </div>
+        <div class="menu-item">
+            <span>Вібрація</span>
+            <input type="checkbox" checked id="vibration-toggle">
+        </div>
+        <button class="save-btn" onclick="toggleSettings()">ЗБЕРЕГТИ</button>
+    </div>
+</div>
+    <script src="tasks.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
