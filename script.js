@@ -102,7 +102,7 @@ function nextTask() {
 
     // --- КРОК 0.5: КОЛЕСО ФОРТУНИ (10% шанс) ---
     let fortuneChance = Math.floor(Math.random() * 100);
-    if (fortuneChance < 100) {
+    if (fortuneChance < 10) {
         let statusObj = fortuneStatuses[Math.floor(Math.random() * fortuneStatuses.length)];
         
         // Знаходимо гравця в оригінальному масиві і міняємо йому статус

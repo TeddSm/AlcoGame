@@ -100,7 +100,7 @@ input {
     flex-wrap: wrap;
     gap: 8px;
     justify-content: flex-end;
-    pointer-events: none; /* Щоб кліки проходили крізь плашку на екран гри */
+    pointer-events: none; 
 }
 
 .status-badge {
