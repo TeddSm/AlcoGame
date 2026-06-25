@@ -91,6 +91,34 @@ input {
     transition: background-color 0.4s ease;
 }
 
+.statuses-bar {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    pointer-events: none; /* Щоб кліки проходили крізь плашку на екран гри */
+}
+
+.status-badge {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .task-text {
     font-size: 35px;
     font-weight: 900;
