@@ -89,6 +89,7 @@ input {
     justify-content: center;
     cursor: pointer;
     transition: background-color 0.4s ease;
+    width: 100%;
 }
 
 .statuses-bar {
@@ -209,4 +210,31 @@ input {
     border-radius: 15px;
     font-weight: bold;
     cursor: pointer;
+}
+
+.fortune-gradient {
+    background: linear-gradient(-45deg, #7f00ff, #ff007f, #1f005c, #ff0055);
+    background-size: 400% 400%;
+    animation: gradientMove 6s ease infinite !important;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Неонове свічення для тексту Колеса */
+.neon-glow {
+    color: #fff;
+    text-shadow: 0 0 10px #fff, 
+                 0 0 20px #ff007f, 
+                 0 0 30px #7f00ff, 
+                 0 0 40px #ff007f;
+    animation: neonPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulse {
+    from { text-shadow: 0 0 10px #fff, 0 0 20px #ff007f, 0 0 30px #7f00ff; }
+    to { text-shadow: 0 0 15px #fff, 0 0 30px #ff0055, 0 0 40px #7f00ff, 0 0 50px #ff0055; }
 }
