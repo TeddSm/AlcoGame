@@ -8,6 +8,11 @@ let currentRule = {
     turnsLeft: 0      // Скільки ходів воно діє
 };
 
+// ЛІЧИЛЬНИКИ КРОКІВ ДЛЯ ЗАХИСТУ ВІД ЧАСТОГО ВИПАДАННЯ (КУЛДАУНИ)
+let turnsSinceLastRule = 0;    // Кроки з моменту останнього правила
+let turnsSinceLastPenalty = 0; // Кроки з моменту останнього штрафу
+let turnsSinceLastWheel = 0;   // Кроки з моменту останнього Колеса
+
 // ==========================================
 // 1. СЕРВІСНІ ФУНКЦІЇ (ІНТЕРФЕЙС ТА НАЛАШТУВАННЯ)
 // ==========================================
@@ -70,13 +75,34 @@ function updateStatusesBar() {
 function startGame() {
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'flex';
+
+    document.body.classList.add('game-active');
     
-    // Повне скидання правил при старті нової гри
+    // Повне скидання правил та лічильників при старті нової гри
     currentRule.text = null;
     currentRule.turnsLeft = 0;
+    turnsSinceLastRule = 15;     // Дозволяємо випадіння зі старту гри
+    turnsSinceLastPenalty = 20;
+    turnsSinceLastWheel = 15;
     
     turnsUntilNextRule = Math.floor(Math.random() * 5) + 5;
+    checkOrientationBeforeStart();
     updateStatusesBar();
+}
+
+function checkOrientationBeforeStart() {
+    const taskTextElement = document.getElementById('task-text');
+    
+    // Перевіряємо, чи ми на самому початку гри (ще не було тапу)
+    if (taskTextElement.innerText.includes("почати") || taskTextElement.innerText.includes("Переверніть")) {
+        
+        // window.innerHeight > window.innerWidth означає, що екран ВЕРТИКАЛЬНИЙ
+        if (window.innerHeight > window.innerWidth) {
+            taskTextElement.innerHTML = "🔄<br><br>Переверніть телефон горизонтально для початку гри!<br>Натисніть на екран, щоб почати!";
+        } else {
+            taskTextElement.innerText = "Натисніть на екран, щоб почати!";
+        }
+    }
 }
 
 // ==========================================
@@ -109,9 +135,9 @@ function triggerFortuneWheel(taskTextElement, gameScreen, shuffled) {
     gameScreen.classList.add('fortune-gradient');
     taskTextElement.classList.add('neon-glow');
 
-    let duration = 3000;      // Загальний час сцени (3 секунди)
+    let duration = 4000;      // Загальний час сцени (3 секунди)
     let elapsed = 0;
-    let intervalTime = 50;    // Початкова швидкість перебору
+    let intervalTime = 60;    // Початкова швидкість перебору
 
     function spin() {
         let randomPlayer = players[Math.floor(Math.random() * players.length)];
@@ -123,7 +149,7 @@ function triggerFortuneWheel(taskTextElement, gameScreen, shuffled) {
         if (elapsed < duration) {
             // Ефект плавної зупинки рулетки на другій половині часу
             if (elapsed > duration * 0.5) {
-                intervalTime += 15; 
+                intervalTime += 20; 
             }
             setTimeout(spin, intervalTime);
         } else {
@@ -154,7 +180,7 @@ function handleRulesLogic(taskTextElement, gameScreen, shuffled) {
             currentRule.text = null; // Скидаємо правило
             
             gameScreen.style.backgroundColor = "#27ae60"; 
-            turnsUntilNextRule = Math.floor(Math.random() * 10) + 5;
+            turnsUntilNextRule = Math.floor(Math.random() * 10) + 20;
             return true; 
         }
     }
@@ -162,11 +188,13 @@ function handleRulesLogic(taskTextElement, gameScreen, shuffled) {
     // 2. Чи пора вводити нове глобальне правило для всіх?
     if (currentRule.text === null) {
         turnsUntilNextRule--;
-        if (turnsUntilNextRule <= 0) {
+        // Перевіряємо зарезервовані ходи ТА лічильник turnsSinceLastRule
+        if (turnsUntilNextRule <= 0 && turnsSinceLastRule >= 15) {
             let ruleTemplate = ruleTemplates[Math.floor(Math.random() * ruleTemplates.length)];
             
             currentRule.text = ruleTemplate;
             currentRule.turnsLeft = Math.floor(Math.random() * 10) + 5; 
+            turnsSinceLastRule = 0; // Скидаємо лічильник правил
             
             taskTextElement.innerText = `⚠️ ЗАГАЛЬНЕ ПРАВИЛО ДЛЯ ВСІХ!\n\n${currentRule.text}\n\n(Діє ходів: ${currentRule.turnsLeft})`;
             gameScreen.style.backgroundColor = "#ffbb00"; 
@@ -211,17 +239,24 @@ function nextTask() {
     });
     updateStatusesBar(); 
 
+    // Збільшуємо лічильники кроків для кулдаунів
+    turnsSinceLastRule++;
+    turnsSinceLastPenalty++;
+    turnsSinceLastWheel++;
+
     // Розрахунок ймовірностей (Диспетчер подій)
     let diceRoll = Math.floor(Math.random() * 100);
 
-    // [0-4] -> Штраф (5% шанс)
-    if (diceRoll < 5) {
+    // [0-2] -> Штраф (Шанс спрацює лише якщо пройшло 20 кроків)
+    if (diceRoll < 3 && turnsSinceLastPenalty >= 20) {
+        turnsSinceLastPenalty = 0;
         triggerMaxPenalty(taskTextElement, gameScreen, shuffled);
         return;
     }
 
-    // [5-14] -> Колесо фортуни (10% шанс)
-    if (diceRoll < 15) {
+    // [3-4] -> Колесо фортуни (Шанс спрацює лише якщо пройшло 15 кроків)
+    if (diceRoll < 10 && turnsSinceLastWheel >= 15) {
+        turnsSinceLastWheel = 0;
         triggerFortuneWheel(taskTextElement, gameScreen, shuffled);
         return;
     }
@@ -230,7 +265,7 @@ function nextTask() {
     let ruleTriggered = handleRulesLogic(taskTextElement, gameScreen, shuffled);
     if (ruleTriggered) return;
 
-    // Якщо жоден особливий режим не випав — граємо звичайну карту
+    // Якщо жоден особливий режим не випав або заблокований кулдауном — граємо звичайну карту
     triggerStandardTask(taskTextElement, gameScreen, shuffled);
 }
 
@@ -254,3 +289,5 @@ window.onclick = function(event) {
     const modal = document.getElementById('settings-modal');
     if (event.target == modal) modal.style.display = "none";
 }
+
+window.addEventListener('resize', checkOrientationBeforeStart);
